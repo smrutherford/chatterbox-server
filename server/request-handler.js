@@ -25,7 +25,7 @@ var respond = function(response, data, statusCode) {
   statusCode = statusCode || 200;
   response.writeHead(statusCode, headers);
   response.end(data);
-}
+};
 
 var requestHandler = function(request, response) {
   
@@ -60,7 +60,7 @@ var requestHandler = function(request, response) {
   } else if (request.method === 'POST') {
     request.on('data', (chunk) => {
       var message = JSON.parse(chunk.toString());
-      console.log(storage)
+      console.log(storage);
       storage.push(message);
       fs.writeFile(path.join(__dirname, 'storage.txt'), JSON.stringify({ results: storage }), function(err) {
         if (err) { throw err; }
