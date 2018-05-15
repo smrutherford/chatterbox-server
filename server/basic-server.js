@@ -2,6 +2,8 @@
 var http = require('http');
 var fs = require('fs');
 var requestHandler = require('./request-handler');
+var express = require('express');
+var server = express();
 
 // Every server needs to listen on a port with a unique number. The
 // standard port for HTTP servers is port 80, but that port is
@@ -21,7 +23,9 @@ var ip = '127.0.0.1';
 // incoming requests.
 //
 // After creating the server, we will tell it to listen on the given port and IP. */
-var server = http.createServer(requestHandler.handleRequest);
+// var server = http.createServer(requestHandler.handleRequest);
+
+server.all('/*', requestHandler.handleRequest);
 console.log('Listening on http://' + ip + ':' + port);
 server.listen(port, ip);
 
