@@ -8,8 +8,11 @@ app.init = function() {
 };
 
 handleData = function(chats) {
-  console.log(chats);
+  console.log('Before: ', typeof chats);
+  chats = JSON.parse(chats);
+  console.log('Before: ', typeof chats);
   chats = chats.results;
+  console.log('After: ', chats);
   for (var i = 0; i < chats.length; i++) {
     
     if (!filterBadMessages(chats[i])) {

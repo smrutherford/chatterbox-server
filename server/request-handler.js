@@ -51,7 +51,7 @@ var requestHandler = function(request, response) {
     response.writeHead(statusCode, headers);
     request.on('data', (chunk) => {
       var message = chunk.toString();
-      // console.log(message);
+      console.log(message);
       storage.push(JSON.parse(message));
       response.end(JSON.stringify({ results: storage}));
     });    
@@ -63,6 +63,12 @@ var requestHandler = function(request, response) {
     response.writeHead(statusCode, headers);
     // console.log(JSON.parse(JSON.stringify({ results: storage})));
     response.end(JSON.stringify({ results: storage}));
+  } else {
+    var statusCode = 200;
+    var headers = defaultCorsHeaders;
+    headers['Content-Type'] = 'text/plain';
+    response.writeHead(statusCode, headers);
+    response.end();
   }
 
   console.log('Storage: ', storage);
