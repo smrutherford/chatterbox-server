@@ -36,6 +36,7 @@ var defaultCorsHeaders = {
 
 var requestHandler = function(request, response) {
   
+  console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   if (request.url !== '/classes/messages' && request.url !== '/classes/messages?order=-createdAt') {
     var statusCode = 404;
@@ -45,23 +46,42 @@ var requestHandler = function(request, response) {
     response.end(JSON.stringify({ results: [] }));
 
   } else if (request.method === 'POST') {
-    var statusCode = 201;
-    var headers = defaultCorsHeaders;
-    headers['Content-Type'] = 'text/plain';
-    response.writeHead(statusCode, headers);
     request.on('data', (chunk) => {
-      var message = chunk.toString();
-      console.log(message);
-      storage.push(JSON.parse(message));
-      response.end(JSON.stringify({ results: storage}));
-    });    
-    response.end('Hello, World!');
+      var message = JSON.parse(chunk.toString());
+      console.log(message.username);
+      if (message.username === undefined || message.username === '') {
+        var statusCode = 405;
+        var headers = defaultCorsHeaders;
+        headers['Content-Type'] = 'text/plain';
+        response.writeHead(statusCode, headers);
+        response.end();
+      } else if (message.text === undefined || message.text === '') {
+        var statusCode = 406;
+        var headers = defaultCorsHeaders;
+        headers['Content-Type'] = 'text/plain';
+        response.writeHead(statusCode, headers);
+        response.end();
+      } else if (message.roomname === undefined || message.roomname === '') {
+        var statusCode = 407;
+        var headers = defaultCorsHeaders;
+        headers['Content-Type'] = 'text/plain';
+        response.writeHead(statusCode, headers);
+        response.end();
+      } else {
+        var statusCode = 201;
+        var headers = defaultCorsHeaders;
+        headers['Content-Type'] = 'text/plain';
+        response.writeHead(statusCode, headers);
+        storage.push(message);
+        response.end(JSON.stringify({ results: storage}));
+      }
+      
+    });
   } else if (request.method === 'GET') {
     var statusCode = 200;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'text/plain';
     response.writeHead(statusCode, headers);
-    // console.log(JSON.parse(JSON.stringify({ results: storage})));
     response.end(JSON.stringify({ results: storage}));
   } else {
     var statusCode = 200;
@@ -71,7 +91,6 @@ var requestHandler = function(request, response) {
     response.end();
   }
 
-  console.log('Storage: ', storage);
 
   // var statusCode = 404;
   
@@ -91,7 +110,7 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  // console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  
 
   // The outgoing status.
   

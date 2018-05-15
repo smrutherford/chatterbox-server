@@ -38,7 +38,8 @@ describe('server', function() {
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
         username: 'Jono',
-        text: 'Do my bidding!'}
+        text: 'Do my bidding!',
+        roomname: 'room'}
     };
 
     request(requestParams, function(error, response, body) {
@@ -52,7 +53,8 @@ describe('server', function() {
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
         username: 'Jono',
-        text: 'Do my bidding!'}
+        text: 'Do my bidding!',
+        roomname: 'room'}
     };
 
     request(requestParams, function(error, response, body) {
@@ -71,7 +73,61 @@ describe('server', function() {
       expect(response.statusCode).to.equal(404);
       done();
     });
+
   });
 
+  it('Should only accept messages with username', function(done) {
 
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: '',
+        text: 'Do my bidding!',
+        roomname: 'room'
+      }
+    };
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      expect(response.statusCode).to.equal(405);
+      done();
+    });
+  });
+
+  it('Should not accept empty string as message', function(done) {
+
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+          
+        username: 'name',
+        text: '',
+        rommname: 'room'
+    
+      }
+    };
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      expect(response.statusCode).to.equal(406);
+      done();
+    });
+  });
+
+  it('Should not accept empty string as roomname', function(done) {
+
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+          
+        username: 'name',
+        text: 'hello',
+        rommname: ''
+    
+      }
+    };
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      expect(response.statusCode).to.equal(407);
+      done();
+    });
+  });
 });
