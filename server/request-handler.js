@@ -1,3 +1,5 @@
+var fs = require('fs');
+var path = require('path');
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -18,6 +20,9 @@ var exampleResponseObject = {
   results: storage
 };
 
+var fileOutput = fs.createReadStream(path.join(__dirname, 'storage.txt'));
+// var fileOutput = fs.createReadStream(path.join(__dirname, 'storage.txt'));
+
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
 // are on different domains, for instance, your chat client.
@@ -37,13 +42,45 @@ var defaultCorsHeaders = {
 var requestHandler = function(request, response) {
   
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-
-  if (request.url !== '/classes/messages' && request.url !== '/classes/messages?order=-createdAt') {
+  
+  if (request.url === '/' || request.url.includes('username')) {
+    fs.readFile(path.join(__dirname, '..', 'client', 'index.html'), 'utf8', function(err, data) {
+      if (err) { throw err; }
+      response.writeHead(200, {'Content-Type': 'text/html'});
+      response.write(data);
+      response.end();
+    });  
+    fs.readFile(path.join(__dirname, 'storage.txt'), 'utf8', function(err, data) {
+      if (err) { throw err; }
+      storage = JSON.parse(data).results;
+      console.log('Data Loaded');
+    });
+    // fileOutput.on('data', function(data) {
+    //   storage = JSON.parse(data.toString()).results;
+    // });
+    
+    // fileOutput.on('end', function() {
+      
+    // })
+  } else if (request.url.includes('client')) {
+    fs.readFile(path.join(__dirname, '..', request.url), 'utf8', function(err, data) {
+      if (err) { throw err; }
+      if (request.url.includes('.css')) {
+        response.writeHead(200, {'Content-Type': 'text/css'});
+      } else {
+        response.writeHead(200, {'Content-Type': 'text/javascript'});
+      }
+      
+      // console.log(data);
+      response.write(data);
+      response.end();
+    });
+  } else if (request.url !== '/classes/messages' && request.url !== '/classes/messages?order=-createdAt') {
     var statusCode = 404;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'text/plain';
     response.writeHead(statusCode, headers);
-    response.end(JSON.stringify({ results: [] }));
+    response.end(JSON.stringify({ results: 'Not Correct URL' }));
 
   } else if (request.method === 'POST') {
     request.on('data', (chunk) => {
@@ -73,17 +110,42 @@ var requestHandler = function(request, response) {
         headers['Content-Type'] = 'text/plain';
         response.writeHead(statusCode, headers);
         storage.push(message);
-        response.end(JSON.stringify({ results: storage}));
+        console.log(storage);
+        fs.writeFile(path.join(__dirname, 'storage.txt'), JSON.stringify({ results: storage }), function(err) {
+          if (err) { throw err; }
+          console.log('saved');
+        });
+        response.end(JSON.stringify({ results: storage }));
       }
       
     });
   } else if (request.method === 'GET') {
-    var statusCode = 200;
-    var headers = defaultCorsHeaders;
-    headers['Content-Type'] = 'text/plain';
-    response.writeHead(statusCode, headers);
-    response.end(JSON.stringify({ results: storage}));
+    
+    fs.readFile(path.join(__dirname, 'storage.txt'), 'utf8', function(err, data) {
+      if (err) { throw err; }
+      var statusCode = 200;
+      var headers = defaultCorsHeaders;
+      headers['Content-Type'] = 'text/plain';
+      response.writeHead(statusCode, headers);
+      response.write(data);
+      response.end();
+    });
+    // fileOutput.on('data', function(data) {
+      
+    //   response.write(data.toString());
+      
+    // });
+    
+    // fileOutput.on('end', function() {
+    //   var statusCode = 200;
+    //   var headers = defaultCorsHeaders;
+    //   headers['Content-Type'] = 'text/plain';
+    //   response.writeHead(statusCode, headers);
+    //   response.end();
+    // })
+    
   } else {
+    
     var statusCode = 200;
     var headers = defaultCorsHeaders;
     headers['Content-Type'] = 'text/plain';
